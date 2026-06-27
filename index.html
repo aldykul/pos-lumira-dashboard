@@ -1,0 +1,82 @@
+import { Suspense } from 'react';
+
+// Tipe data untuk transaksi kasir
+type Transaction = {
+  id: string;
+  tanggal: string;
+  item: string;
+  jumlah: number;
+  totalHarga: number;
+};
+
+// Fungsi untuk mengambil data (Ganti URL dengan endpoint API spreadsheet kamu)
+async function getTransactions(): Promise<Transaction[]> {
+  // Contoh menggunakan endpoint dummy / SheetDB
+  const res = await fetch('https://api.contoh.com/endpoint-excel-kamu', {
+    next: { revalidate: 60 }, // ISR: Vercel akan menarik data baru setiap 60 detik agar tidak membebani API
+  });
+
+  if (!res.ok) {
+    throw new Error('Gagal mengambil data dari Excel/API');
+  }
+
+  return res.json();
+}
+
+// Komponen Tabel untuk menampilkan data
+async function TransactionTable() {
+  const transactions = await getTransactions();
+
+  return (
+    <div className="overflow-x-auto bg-white rounded-lg shadow">
+      <table className="min-w-full text-left text-sm whitespace-nowrap">
+        <thead className="uppercase tracking-wider border-b-2 border-gray-200 bg-gray-50">
+          <tr>
+            <th className="px-6 py-4 font-bold text-gray-600">ID Transaksi</th>
+            <th className="px-6 py-4 font-bold text-gray-600">Tanggal</th>
+            <th className="px-6 py-4 font-bold text-gray-600">Item Cetak</th>
+            <th className="px-6 py-4 font-bold text-gray-600 text-right">Qty</th>
+            <th className="px-6 py-4 font-bold text-gray-600 text-right">Total (Rp)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {transactions.map((trx) => (
+            <tr key={trx.id} className="border-b border-gray-200 hover:bg-gray-100 transition">
+              <td className="px-6 py-4">{trx.id}</td>
+              <td className="px-6 py-4">{trx.tanggal}</td>
+              <td className="px-6 py-4">{trx.item}</td>
+              <td className="px-6 py-4 text-right">{trx.jumlah}</td>
+              <td className="px-6 py-4 text-right">
+                {new Intl.NumberFormat('id-ID').format(trx.totalHarga)}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// Halaman Utama Dashboard
+export default function Dashboard() {
+  return (
+    <main className="min-h-screen bg-gray-100 p-8">
+      <div className="max-w-6xl mx-auto">
+        <header className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-extrabold text-gray-900">Dashboard POS Online</h1>
+            <p className="text-gray-500 mt-1">Pemantauan transaksi kasir jarak jauh</p>
+          </div>
+          <div className="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold shadow">
+            Status: Tersinkronisasi
+          </div>
+        </header>
+
+        {/* Suspense digunakan untuk menampilkan loading state saat data sedang diambil */}
+        <Suspense fallback={<div className="text-center p-10 text-gray-500">Memuat data dari kasir...</div>}>
+          <TransactionTable />
+        </Suspense>
+      </div>
+    </main>
+  );
+}
