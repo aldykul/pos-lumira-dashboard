@@ -9,8 +9,7 @@ Kembalian: number;
 };																									
 																									
 async function getReports(): Promise<TransactionReport[]> {																									
-// GANTI URL DI BAWAH INI DENGAN URL APLIKASI WEB YANG KAMU SIMPAN DI FASE 1																									
-const res = await fetch('PASTE_URL_APPLIKASI_WEB_KAMU_DISINI', {																									
+const res = await fetch('https://script.google.com/macros/s/AKfycbz1uLGpLSVmsmDY5nyyH3I-caM72e2vdKOAFiSnXy8DlyjNndNDJOD2T5QYmFuQZxvo/exec', {																									
 next: { revalidate: 30 },																									
 });																									
 																									
@@ -81,6 +80,7 @@ return (
 </div>																									
 </main>																									
 );																									
+}																									
 }																									
 																									
 																									
